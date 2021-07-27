@@ -130,8 +130,8 @@ const INJECTED_JAVASCRIPT = `
 		
 		const attachDownloadEventListener = () => {
 			document.addEventListener('click', function (event) {
-				event.preventDefault();
 				if (event.target.matches('a[href^="blob:"]')) {
+					event.preventDefault();
 					(async (el) => {
 						const url = el.href;
 						const blob = await fetch(url).then((r) => r.blob());
@@ -254,9 +254,6 @@ export const App = () => {
 							Linking.openURL(event.url);
 						}
 					}}
-					// onFileDownload={(event) => {
-					// 	console.log('filedownload ', event);
-					// }}s
 				/>
 			</SafeAreaView>
 		</FlingGestureHandler>
