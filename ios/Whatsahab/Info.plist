@@ -51,5 +51,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+    <array>
+     <string>blob</string>
+    </array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to the photo library to save images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to the photo library to save images.</string>
 </dict>
 </plist>

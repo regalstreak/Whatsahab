@@ -1,6 +1,12 @@
 import React, { useRef } from 'react';
-import { SafeAreaView } from 'react-native';
+import { Linking, SafeAreaView } from 'react-native';
+import {
+	FlingGestureHandler,
+	Directions,
+	State,
+} from 'react-native-gesture-handler';
 import WebView from 'react-native-webview';
+import RNFetchBlob from 'rn-fetch-blob';
 import { WebViewMessageEvent } from 'react-native-webview/lib/WebViewTypes';
 import { sendLocalNotification } from './src/utils/notifications';
 
@@ -29,7 +35,7 @@ const INJECTED_JAVASCRIPT = `
 
 			constructor(title, options) {
 				window.ReactNativeWebView.postMessage(
-					JSON.stringify({ title, options }),
+					JSON.stringify({ title, options, messageType: 'notification' }),
 				);
 			}
 		}
@@ -116,6 +122,30 @@ const INJECTED_JAVASCRIPT = `
 			};
 		};
 
+		function blobToDataURL(blob, callback) {
+			var a = new FileReader();
+			a.onload = function(e) {callback(e.target.result);}
+			a.readAsDataURL(blob);
+		}
+		
+		const attachDownloadEventListener = () => {
+			document.addEventListener('click', function (event) {
+				event.preventDefault();
+				if (event.target.matches('a[href^="blob:"]')) {
+					(async (el) => {
+						const url = el.href;
+						const blob = await fetch(url).then((r) => r.blob());
+						blobToDataURL(blob, (datauri) => {
+							el.href = datauri
+							window.ReactNativeWebView.postMessage(
+								JSON.stringify({ messageType: 'downloadData', dataUri: datauri, fileName: el.download }),
+							);
+						});
+					})(event.target);
+				}
+			});
+		};
+
 		const main = () => {
 			removeIntro();
 			fixMobileWidth();
@@ -126,6 +156,7 @@ const INJECTED_JAVASCRIPT = `
 					attachChatListItemListeners();
 				}, 1000),
 			);
+			attachDownloadEventListener();
 		};
 
 		const sideFinderMutationObserver = new window.MutationObserver(
@@ -156,31 +187,78 @@ const INJECTED_JAVASCRIPT = `
 
 `;
 
+const whatsappWebUri = 'https://web.whatsapp.com';
+
 export const App = () => {
 	const webviewRef = useRef<WebView>(null);
 
 	return (
-		<SafeAreaView
-			style={{
-				flex: 1,
+		<FlingGestureHandler
+			direction={Directions.RIGHT}
+			onHandlerStateChange={({ nativeEvent }) => {
+				if (nativeEvent.state === State.ACTIVE) {
+					webviewRef.current?.injectJavaScript(
+						`	
+							document.querySelector('#main').parentElement.style.display = 'none';
+							document.querySelector('#side').parentElement.style.display = 'block';
+						`,
+					);
+				}
 			}}
 		>
-			<WebView
-				ref={webviewRef}
-				source={{
-					uri: 'https://web.whatsapp.com',
+			<SafeAreaView
+				style={{
+					flex: 1,
 				}}
-				userAgent={userAgent}
-				injectedJavaScript={INJECTED_JAVASCRIPT}
-				onMessage={(event: WebViewMessageEvent) => {
-					const notificationData = JSON.parse(event.nativeEvent.data);
-					sendLocalNotification({
-						title: notificationData.title,
-						message: notificationData.options.body,
-					});
-				}}
-				allowsBackForwardNavigationGestures={true}
-			/>
-		</SafeAreaView>
+			>
+				<WebView
+					ref={webviewRef}
+					source={{
+						uri: whatsappWebUri,
+					}}
+					userAgent={userAgent}
+					injectedJavaScript={INJECTED_JAVASCRIPT}
+					onMessage={(event: WebViewMessageEvent) => {
+						const messageData = JSON.parse(event.nativeEvent.data);
+						if (messageData.messageType === 'notification') {
+							sendLocalNotification({
+								title: messageData.title,
+								message: messageData.options.body,
+							});
+							return;
+						}
+						if (messageData.messageType === 'downloadData') {
+							const filePath =
+								RNFetchBlob.fs.dirs.CacheDir +
+								'/' +
+								messageData.fileName;
+							RNFetchBlob.fs.writeFile(
+								filePath,
+								messageData.dataUri.split('base64,')[1],
+								'base64',
+							);
+							setTimeout(() => {
+								RNFetchBlob.ios.previewDocument(filePath);
+							}, 0);
+							return;
+						}
+					}}
+					onNavigationStateChange={(event) => {
+						if (
+							!event.url
+								.toLowerCase()
+								.includes(whatsappWebUri.toLowerCase()) &&
+							event.navigationType === 'click'
+						) {
+							webviewRef.current?.stopLoading();
+							Linking.openURL(event.url);
+						}
+					}}
+					// onFileDownload={(event) => {
+					// 	console.log('filedownload ', event);
+					// }}s
+				/>
+			</SafeAreaView>
+		</FlingGestureHandler>
 	);
 };
