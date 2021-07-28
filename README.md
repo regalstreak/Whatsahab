@@ -1,6 +1,6 @@
 # Whatsahab
 
-> The name is an internal joke at @SudodevsHQ, feel free to cringe.
+> The name is an internal joke at [@SudodevsHQ](https://github.com/SudodevsHQ), feel free to cringe.
 
 Just a simple webview that wraps web.whatsapp.com (which isn't responsive) and applies mobile styling with some handy gestures.
 
@@ -20,11 +20,11 @@ Very useful for folks shifting to iOS from Android who don't want to lose their 
 
 ## Screenshots
 
-<img height="500" src="./docs/assets/0.png" alt="screen">&nbsp;&nbsp;&nbsp;
-<img height="500" src="./docs/assets/1.png" alt="screen">&nbsp;&nbsp;&nbsp;
+<img height="500" src="./docs/assets/0.PNG" alt="screen">&nbsp;&nbsp;&nbsp;
+<img height="500" src="./docs/assets/1.PNG" alt="screen">&nbsp;&nbsp;&nbsp;
 <br><br>
-<img height="500" src="./docs/assets/2.png" alt="screen">&nbsp;&nbsp;&nbsp;
-<img height="500" src="./docs/assets/3.png" alt="screen">&nbsp;&nbsp;&nbsp;
+<img height="500" src="./docs/assets/2.PNG" alt="screen">&nbsp;&nbsp;&nbsp;
+<img height="500" src="./docs/assets/3.PNG" alt="screen">&nbsp;&nbsp;&nbsp;
 
 ## Features
 
@@ -37,11 +37,11 @@ Very useful for folks shifting to iOS from Android who don't want to lose their 
 
 ## Todo
 
-[ ] Figure out a way to fix the infamous mouseover double click iOS webview issue
-[ ] Figure out a way to persist the webview after locking to recieve notifications
-[ ] Styling the remaining menus
-[ ] Debug sending voice notes
-[ ] Swipe down to reload etc
+- [ ] Figure out a way to fix the infamous mouseover double click iOS webview issue
+- [ ] Figure out a way to persist the webview after locking to recieve notifications
+- [ ] Styling the remaining menus
+- [ ] Debug sending voice notes
+- [ ] Swipe down to reload etc
 
 ## Building
 
